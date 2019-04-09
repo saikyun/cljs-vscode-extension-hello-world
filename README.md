@@ -85,7 +85,7 @@ Enjoy!
 
 Since we're acting like spoilt kids, we're lucky to have [thheller](https://github.com/thheller) to provide for us. When you run `shadow-cljs watch dev`, you might in the terminal notice a line akin to: `shadow-cljs - nREPL server started on port 61155`. Great news!
 
-1. Connect to the nREPL server using your favourite client. Since you're using vscode, maybe [Calva](https://marketplace.visualstudio.com/itemdetails?itemName=cospaia.clojure4vscode)? I tried with `cider-mode`, just for fun.
+1. Connect to the nREPL server using your favourite client. Since you're using vscode, maybe [Calva](https://marketplace.visualstudio.com/itemdetails?itemName=cospaia.clojure4vscode)? I've also tried [cider-mode](https://cider.readthedocs.io/en/latest/).
 2. Now, you might think that you can just fire away stuff like `(js/console.log "I'm the queen!")`, but sadly, your client will most likely just get mad at you. This is what I got:
 ```
 Syntax error compiling at (cljs-vscode-extension-hello-world:localhost:62584(clj)*<2>:47:14).
@@ -93,7 +93,8 @@ No such namespace: js
 ```
 The issue? We're in jvm-land!
 
-3. To solve this, follow the instructions most relevant to your editor here: https://shadow-cljs.github.io/docs/UsersGuide.html#_editor_integration
+3. To solve this, follow the instructions most relevant to your editor here: https://shadow-cljs.github.io/docs/UsersGuide.html#_editor_integration \
+If you try this in `cider-mode`, it's important to **not** press enter when connecting using the sibling repl. You have to explicitly write `:dev`.
 4. When you have successfully connected with a cljs-repl client, you should be able to evaluate: `(js/console.log "I'm the queen!")` - the result is shown in the `Debug Console` of the vscode instance where you started debugging!
 5. To really verify that it works, you could run the following in the repl:
 ```
