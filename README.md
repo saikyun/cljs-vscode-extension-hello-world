@@ -42,16 +42,35 @@ As we are clojurians, we love us some dynamic development environments. The step
 
 When you register the command, instead of registering a lambda, register a var instead!
 
+In `core.cljs`:
+
 ```
 (defn hella-world [] (.. vscode.window (showInformationMessage "Hella World!")))
+```
 
+And modify the call to `registerCommand`:
+
+```
 (.. vscode.commands
   (registerCommand
   "extension.helloWorld"
   #'hella-world))
 ```
 
-Then save, and click the green `Restart`-symbol in the debugging interface (the one with the pause-button etc). Or if you can't find it, just stop debugging and start it again.
+We also need to remove the cached version of our script, add the following function as well:
+```
+(defn reload [] (.log js/console "Reloading...")
+  (js-delete js/require.cache (js/require.resolve "./extension")))
+```
+
+And in `shadow-cljs.edn`, add the following:
+```
+:builds
+ {:dev {...
+        :devtools {:after-load extension.core/reload}}}}
+```
+
+After saving both files, click the green `Restart`-symbol in the debugging interface (the one with the pause-button etc). Or if you can't find it, just stop debugging and start it again.
 
 Now you can make changes to `hella-world`, and those changes will be available in the debugging instance of vscode. Try it out by changing the message to something less profane, and run the command "Hello World" again! :) Make sure that your project compiles properly, you see this by looking in the terminal, where shadow-cljs is nice enough to tell you when something goes wrong.
 
