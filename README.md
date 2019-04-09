@@ -72,7 +72,9 @@ And in `shadow-cljs.edn`, add the following:
 
 After saving both files, click the green `Restart`-symbol in the debugging interface (the one with the pause-button etc). Or if you can't find it, just stop debugging and start it again.
 
-Now you can make changes to `hella-world`, and those changes will be available in the debugging instance of vscode. Try it out by changing the message to something less profane, and run the command "Hello World" again! :) Make sure that your project compiles properly, you see this by looking in the terminal, where shadow-cljs is nice enough to tell you when something goes wrong.
+Now you can make changes to `hella-world`, and those changes will be available in the debugging instance of vscode. Try it out by changing the message to something less profane, and run the command "Hello World" again! :)
+
+Make sure that your project compiles properly, you see this by looking in the terminal, where shadow-cljs is nice enough to tell you when something goes wrong.
 
 Enjoy!
 
