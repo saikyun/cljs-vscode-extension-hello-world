@@ -1,6 +1,6 @@
 # Minimal CLJS VSCode extension using shadow-cljs
 
-This is a CLJS translation of the "Hello World Minimal Sample" for VSCode.
+This is a CLJS translation of the "Hello World Minimal Sample" for Visual Studio Code.
 Original repo: https://github.com/Microsoft/vscode-extension-samples/tree/master/helloworld-minimal-sample
 
 ## Installation
