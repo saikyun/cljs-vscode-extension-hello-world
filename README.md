@@ -21,7 +21,7 @@ The `package.json` already contains the dependencies, but I wanted you to do thi
 Fetch the other dependencies:\
 `npm install`
 
-Compile:\
+Compile (this takes a couple of second, later we'll learn how to reduce the compile time by using `watch`!):\
 `shadow-cljs compile dev`
 
 Start debugging (`Debug > Start Debugging`) if you're asked, select "Node.js" as environment.
