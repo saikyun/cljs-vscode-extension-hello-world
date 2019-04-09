@@ -1,0 +1,11 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src"]
+
+ :dependencies
+ []
+
+ :builds
+ {:dev {:exports-var extension.core/exports
+        :target :node-library
+        :output-to "out/extension.js"}}}

@@ -1,0 +1,6 @@
+out/
+node_modules/
+
+.shadow-cljs
+.vscode
+package-lock.json
