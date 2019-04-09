@@ -47,13 +47,13 @@ When you register the command, instead of registering a lambda, register a var i
 
 In `core.cljs`:
 
-```
+```clojure
 (defn hella-world [] (.. vscode.window (showInformationMessage "Hella World!")))
 ```
 
 And modify the call to `registerCommand`:
 
-```
+```clojure
 (.. vscode.commands
   (registerCommand
   "extension.helloWorld"
@@ -61,13 +61,15 @@ And modify the call to `registerCommand`:
 ```
 
 We also need to remove the cached version of our script, add the following function as well:
-```
-(defn reload [] (.log js/console "Reloading...")
+```clojure
+(defn reload
+  []
+  (.log js/console "Reloading...")
   (js-delete js/require.cache (js/require.resolve "./extension")))
 ```
 
 And in `shadow-cljs.edn`, add the following:
-```
+```clojure
 :builds
  {:dev {...
         :devtools {:after-load extension.core/reload}}}}
@@ -97,7 +99,7 @@ The issue? We're in jvm-land!
 If you try this in `cider-mode`, it's important to **not** press enter when connecting using the sibling repl. You have to explicitly write `:dev`.
 4. When you have successfully connected with a cljs-repl client, you should be able to evaluate: `(js/console.log "I'm the queen!")` - the result is shown in the `Debug Console` of the vscode instance where you started debugging!
 5. To really verify that it works, you could run the following in the repl:
-```
+```clojure
 (in-ns 'extension.core) ;;=> extension.core
 (hella-world) ;;=> #object[Promise [object Promise]]
 ```
