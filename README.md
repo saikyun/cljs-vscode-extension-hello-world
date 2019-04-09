@@ -26,3 +26,7 @@ Start debugging (`Debug > Start Debugging`).
 Run the command by opening the command palette (`View > Command Palette...`), then write "Hello World" and press Enter.
 
 Voila!
+
+## Thanks
+
+Thanks to [Sogaiu](https://github.com/sogaiu) for helping me getting started with CLJS. :)
