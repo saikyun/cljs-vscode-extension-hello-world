@@ -18,6 +18,9 @@ And it's dependencies:\
 
 The `package.json` already contains the dependencies, but I wanted you to do this step, in case you later decide to create a new extension!
 
+Fetch the other dependencies:\
+`npm install`
+
 Compile:\
 `shadow-cljs compile dev`
 
