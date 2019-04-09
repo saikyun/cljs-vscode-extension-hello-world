@@ -88,7 +88,7 @@ Since we're acting like spoilt kids, we're lucky to have [thheller](https://gith
 1. Connect to the nREPL server using your favourite client. Since you're using vscode, maybe [Calva](https://marketplace.visualstudio.com/itemdetails?itemName=cospaia.clojure4vscode)? I tried with `cider-mode`, just for fun.
 2. Now, you might think that you can just fire away stuff like `(js/console.log "I'm the queen!")`, but sadly, your client will most likely just get mad at you. This is what I got:
 ```
-Syntax error compiling at (REPL:1:5).
+Syntax error compiling at (cljs-vscode-extension-hello-world:localhost:62584(clj)*<2>:47:14).
 No such namespace: js
 ```
 The issue? We're in jvm-land!
