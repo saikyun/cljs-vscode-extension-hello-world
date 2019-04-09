@@ -91,7 +91,7 @@ Since we're acting like spoilt kids, we're lucky to have [thheller](https://gith
 Syntax error compiling at (cljs-vscode-extension-hello-world:localhost:62584(clj)*<2>:47:14).
 No such namespace: js
 ```
-  The issue? We're in jvm-land!
+The issue? We're in jvm-land!
 
 3. To solve this, follow the instructions most relevant to your editor here: https://shadow-cljs.github.io/docs/UsersGuide.html#_editor_integration \
 If you try this in `cider-mode`, it's important to **not** press enter when connecting using the sibling repl. You have to explicitly write `:dev`.
