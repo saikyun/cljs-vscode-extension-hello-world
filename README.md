@@ -21,7 +21,7 @@ The `package.json` already contains the dependencies, but I wanted you to do thi
 Compile:\
 `shadow-cljs compile dev`
 
-Start debugging (`Debug > Start Debugging`).
+Start debugging (`Debug > Start Debugging`) if you're asked, select "Node.js" as environment.
 
 Run the command by opening the command palette (`View > Command Palette...`), then write "Hello World" and press Enter.
 
