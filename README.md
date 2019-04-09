@@ -29,4 +29,4 @@ Voila!
 
 ## Thanks
 
-Thanks to [Sogaiu](https://github.com/sogaiu) for helping me getting started with CLJS. :)
+Thanks to [sogaiu](https://github.com/sogaiu) for helping me getting started with CLJS. :)
