@@ -94,7 +94,7 @@ No such namespace: js
 The issue? We're in jvm-land!
 
 3. To solve this, follow the instructions most relevant to your editor here: https://shadow-cljs.github.io/docs/UsersGuide.html#_editor_integration
-4. When you have succesfully connected with a cljs-repl client, you should be able to evaluate: `(js/console.log "I'm the queen!")` - the result is shown in the `Debug Console` of the vscode instance where you started debugging!
+4. When you have successfully connected with a cljs-repl client, you should be able to evaluate: `(js/console.log "I'm the queen!")` - the result is shown in the `Debug Console` of the vscode instance where you started debugging!
 
 Phew, all in 4(?) simple(?!) steps.
 
