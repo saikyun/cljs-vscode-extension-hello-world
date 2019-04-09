@@ -81,6 +81,23 @@ Make sure that your project compiles properly, you see this by looking in the te
 
 Enjoy!
 
+## But what about the REPL?
+
+Since we're acting like spoilt kids, we're lucky to have [thheller](https://github.com/thheller) to provide for us. When you run `shadow-cljs watch dev`, you might in the terminal notice a line akin to: `shadow-cljs - nREPL server started on port 61155`.
+
+1. Connect to the nREPL server using your favourite client. Since you're using vscode, maybe Calva? Since I'm egocentric I used `miracle`.
+2. Now, you might think that you can just fire away stuff like `(js/console.log "I'm the queen!")`, but sadly, your client will most likely just get mad at you. This is what I got:
+```
+Syntax error compiling at (REPL:1:5).
+No such namespace: js
+```
+The issue? We're in jvm-land!
+
+3. In order to go to cljs-land, we write the following: `(shadow.cljs.devtools.api/nrepl-select :dev)`
+4. Now, let's try again! `(js/console.log "I'm the queen!")` - this will show up in the `Debug Console` in the vscode instance that you started debugging from.
+
+Phew, all in 4 steps.
+
 ## Thanks
 
 Thanks to [sogaiu](https://github.com/sogaiu) for helping me getting started with CLJS. :)
