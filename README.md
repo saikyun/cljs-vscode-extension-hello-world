@@ -95,48 +95,50 @@ Since we're acting like spoilt kids, we're lucky to have [thheller](https://gith
    No such namespace: js
    ```
    The issue? We're in jvm-land!
+   
+### We need to go deeper!
+To go to CLJS-land, I found it easiest to:
 
-3. To solve this, I found it easiest to:
-    1. Stop debugging
-    2. Write the following in a terminal (if in VSCode, preferably the one you starting debugging from):
-        ```bash
-        $ shadow-cljs clj-repl
-        => (shadow/watch :dev)
-        => (shadow/repl :dev)
-        ```
-        With log messages, it will look something like this (note the nREPL port, you'll need it later):
-        ```bash
-        $ shadow-cljs clj-repl
-        shadow-cljs - config: <...>/cljs-vscode-extension-hello-world/shadow-cljs.edn  cli version: 2.8.29  node: v8.15.0
-        shadow-cljs - server version: 2.8.29 running at http://localhost:9630
-        shadow-cljs - nREPL server started on port 55618
-        shadow-cljs - REPL - see (help)
-        To quit, type: :repl/quit
-        [1:0]~shadow.user=> (shadow/watch :dev)
-        [:dev] Configuring build.
-        [:dev] Compiling ...
-        [:dev] Build completed. (42 files, 2 compiled, 0 warnings, 3.45s)
-        :watching
-        [1:0]~shadow.user=> (shadow/repl :dev)
-        [1:1]~cljs.user=>
-        ```
-        If you now try to eval something in your fresh cljs-repl, you'll might get an error such as: `No application has connected to the REPL server. Make sure your JS environment has loaded your compiled ClojureScript code.`
+1. Stop debugging
+2. Write the following in a terminal (if in VSCode, preferably the one you start debugging from):
+    ```bash
+    $ shadow-cljs clj-repl
+    => (shadow/watch :dev)
+    => (shadow/repl :dev)
+    ```
+    With log messages, it will look something like this (note the nREPL port, you'll need it later):
+    ```bash
+    $ shadow-cljs clj-repl
+    shadow-cljs - config: <...>/cljs-vscode-extension-hello-world/shadow-cljs.edn  cli version: 2.8.29  node: v8.15.0
+    shadow-cljs - server version: 2.8.29 running at http://localhost:9630
+    shadow-cljs - nREPL server started on port 55618
+    shadow-cljs - REPL - see (help)
+    To quit, type: :repl/quit
+    [1:0]~shadow.user=> (shadow/watch :dev)
+    [:dev] Configuring build.
+    [:dev] Compiling ...
+    [:dev] Build completed. (42 files, 2 compiled, 0 warnings, 3.45s)
+    :watching
+    [1:0]~shadow.user=> (shadow/repl :dev)
+    [1:1]~cljs.user=>
+    ```
+    If you now try to eval something in your fresh cljs-repl, you'll might get an error such as: `No application has connected to the REPL server. Make sure your JS environment has loaded your compiled ClojureScript code.`
 
-   3. Start debugging again
-   4. Run the "Hello World" command (this loads your code into vscode)
-   5. Try evaling something at the cljs-repl in the terminal again. Now it should work. :)
-4. Connect using your favourite repl client, e.g. [Calva](https://marketplace.visualstudio.com/itemdetails?itemName=cospaia.clojure4vscode) or [cider-mode](https://cider.readthedocs.io/en/latest/)*.
+3. Start debugging again
+4. Run the "Hello World" command (this loads your code into vscode)
+5. Try evaling something at the cljs-repl in the terminal again. Now it should work. :)
+6. Connect using your favourite repl client, e.g. [Calva](https://marketplace.visualstudio.com/itemdetails?itemName=cospaia.clojure4vscode) or [cider-mode](https://cider.readthedocs.io/en/latest/)*.
    1. Assuming Calva, you can use the command "Calva: Connect", either in the debugging instance (for that emacs feeling), or in the vscode instance that started debugging.
    2. It's important that you fill in the port you got from running `shadow-cljs clj-repl` before.
-5. When you have successfully connected with a cljs-repl client, you should be able to evaluate: `(js/console.log "I'm the queen!")` - the result is shown in the `Debug Console` of the vscode instance where you started debugging!
-6. To really verify that it works, you could run the following in the repl:
+7. When you have successfully connected with a cljs-repl client, you should be able to evaluate: `(js/console.log "I'm the queen!")` - the result is shown in the `Debug Console` of the vscode instance where you started debugging!
+8. To really verify that it works, you could run the following in the repl:
    ```clojure
    (in-ns 'extension.core) ;;=> extension.core
    (hella-world) ;;=> #object[Promise [object Promise]]
    ```
    A notification should popup in the vscode instance running the plugin!
 
-Phew, all in 6(?) simple(?!) steps.
+Phew, all in 8(?) simple(?!) steps.
 
 More information about shadow-cljs: https://shadow-cljs.github.io/docs/UsersGuide.html
 
