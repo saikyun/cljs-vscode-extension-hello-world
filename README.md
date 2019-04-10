@@ -127,18 +127,21 @@ To go to CLJS-land, I found it easiest to:
 3. Start debugging again
 4. Run the "Hello World" command (this loads your code into vscode)
 5. Try evaling something at the cljs-repl in the terminal again. Now it should work. :)
-6. Connect using your favourite repl client, e.g. [Calva](https://marketplace.visualstudio.com/itemdetails?itemName=cospaia.clojure4vscode) or [cider-mode](https://cider.readthedocs.io/en/latest/)*.
+
+### Now add the finishing strokes
+
+1. Connect using your favourite repl client, e.g. [Calva](https://marketplace.visualstudio.com/itemdetails?itemName=cospaia.clojure4vscode) or [cider-mode](https://cider.readthedocs.io/en/latest/)*.
    1. Assuming Calva, you can use the command "Calva: Connect", either in the debugging instance (for that emacs feeling), or in the vscode instance that started debugging.
    2. It's important that you fill in the port you got from running `shadow-cljs clj-repl` before.
-7. When you have successfully connected with a cljs-repl client, you should be able to evaluate: `(js/console.log "I'm the queen!")` - the result is shown in the `Debug Console` of the vscode instance where you started debugging!
-8. To really verify that it works, you could run the following in the repl:
+2. When you have successfully connected with a cljs-repl client, you should be able to evaluate: `(js/console.log "I'm the queen!")` - the result is shown in the `Debug Console` of the vscode instance where you started debugging!
+3. To really verify that it works, you could run the following in the repl:
    ```clojure
    (in-ns 'extension.core) ;;=> extension.core
    (hella-world) ;;=> #object[Promise [object Promise]]
    ```
    A notification should popup in the vscode instance running the plugin!
 
-Phew, all in 8(?) simple(?!) steps.
+Phew, all in a lot of simple(?!) steps' work.
 
 More information about shadow-cljs: https://shadow-cljs.github.io/docs/UsersGuide.html
 
