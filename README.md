@@ -101,6 +101,12 @@ Since we're acting like spoilt kids, we're lucky to have [thheller](https://gith
     2. Write the following in a terminal (if in VSCode, preferably the one you starting debugging from):
         ```bash
         $ shadow-cljs clj-repl
+        => (shadow/watch :dev)
+        => (shadow/repl :dev)
+        ```
+        With log messages, it will look something like this (note the nREPL port, you'll need it later):
+        ```bash
+        $ shadow-cljs clj-repl
         shadow-cljs - config: <...>/cljs-vscode-extension-hello-world/shadow-cljs.edn  cli version: 2.8.29  node: v8.15.0
         shadow-cljs - server version: 2.8.29 running at http://localhost:9630
         shadow-cljs - nREPL server started on port 55618
