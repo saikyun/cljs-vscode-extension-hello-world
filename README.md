@@ -24,7 +24,8 @@ Fetch the other dependencies:\
 Compile (this takes a couple of second, later we'll learn how to reduce the compile time by using `watch`!):\
 `shadow-cljs compile dev`
 
-Start debugging (`Debug > Start Debugging`) if you're asked, select "Node.js" as environment.
+Start debugging (`Debug > Start Debugging`) 
+'re asked, select "Node.js" as environment.
 
 Run the command by opening the command palette (`View > Command Palette...`), then write "Hello World" and press Enter.
 
@@ -98,22 +99,22 @@ Since we're acting like spoilt kids, we're lucky to have [thheller](https://gith
 3. To solve this, I found it easiest to:
     1. Stop debugging
     2. Write the following in a terminal (if in VSCode, preferably the one you starting debugging from):
-    ```bash
-    $ shadow-cljs clj-repl
-    shadow-cljs - config: <...>/cljs-vscode-extension-hello-world/shadow-cljs.edn  cli version: 2.8.29  node: v8.15.0
-    shadow-cljs - server version: 2.8.29 running at http://localhost:9630
-    shadow-cljs - nREPL server started on port 55618
-    shadow-cljs - REPL - see (help)
-    To quit, type: :repl/quit
-    [1:0]~shadow.user=> (shadow/watch :dev)
-    [:dev] Configuring build.
-    [:dev] Compiling ...
-    [:dev] Build completed. (42 files, 2 compiled, 0 warnings, 3.45s)
-    :watching
-    [1:0]~shadow.user=> (shadow/repl :dev)
-    [1:1]~cljs.user=>
-    ```
-    If you now try to eval something in your fresh cljs-repl, you'll might get an error such as: `No application has connected to the REPL server. Make sure your JS environment has loaded your compiled ClojureScript code.`
+        ```bash
+        $ shadow-cljs clj-repl
+        shadow-cljs - config: <...>/cljs-vscode-extension-hello-world/shadow-cljs.edn  cli version: 2.8.29  node: v8.15.0
+        shadow-cljs - server version: 2.8.29 running at http://localhost:9630
+        shadow-cljs - nREPL server started on port 55618
+        shadow-cljs - REPL - see (help)
+        To quit, type: :repl/quit
+        [1:0]~shadow.user=> (shadow/watch :dev)
+        [:dev] Configuring build.
+        [:dev] Compiling ...
+        [:dev] Build completed. (42 files, 2 compiled, 0 warnings, 3.45s)
+        :watching
+        [1:0]~shadow.user=> (shadow/repl :dev)
+        [1:1]~cljs.user=>
+        ```
+        If you now try to eval something in your fresh cljs-repl, you'll might get an error such as: `No application has connected to the REPL server. Make sure your JS environment has loaded your compiled ClojureScript code.`
 
    3. Start debugging again
    4. Run the "Hello World" command (this loads your code into vscode)
