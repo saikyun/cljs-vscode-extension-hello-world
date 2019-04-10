@@ -100,7 +100,12 @@ Since we're acting like spoilt kids, we're lucky to have [thheller](https://gith
 To go to CLJS-land, I found it easiest to:
 
 1. Stop debugging
-2. Write the following in a terminal (if in VSCode, preferably the one you start debugging from):
+2. Add a dependency to `shadow-cljs.edn`:
+    ```clojure
+    :dependencies
+    [[cider/cider-nrepl "0.21.0"]]
+    ```
+3. Write the following in a terminal (if in VSCode, preferably the one you start debugging from):
     ```bash
     $ shadow-cljs clj-repl
     => (shadow/watch :dev)
@@ -124,9 +129,9 @@ To go to CLJS-land, I found it easiest to:
     ```
     If you now try to eval something in your fresh cljs-repl, you'll might get an error such as: `No application has connected to the REPL server. Make sure your JS environment has loaded your compiled ClojureScript code.`
 
-3. Start debugging again
-4. Run the "Hello World" command (this loads your code into vscode)
-5. Try evaling something at the cljs-repl in the terminal again. Now it should work. :)
+4. Start debugging again
+5. Run the "Hello World" command (this loads your code into vscode)
+6. Try evaling something at the cljs-repl in the terminal again. Now it should work. :)
 
 ### Now add the finishing strokes
 
