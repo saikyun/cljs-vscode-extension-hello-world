@@ -125,7 +125,7 @@ Since we're acting like spoilt kids, we're lucky to have [thheller](https://gith
    3. Start debugging again
    4. Run the "Hello World" command (this loads your code into vscode)
    5. Try evaling something at the cljs-repl in the terminal again. Now it should work. :)
-4. Connect using your favourite repl client, e.g. [Calva](https://marketplace.visualstudio.com/itemdetails?itemName=cospaia.clojure4vscode) or [cider-mode](https://cider.readthedocs.io/en/latest/)*.\
+4. Connect using your favourite repl client, e.g. [Calva](https://marketplace.visualstudio.com/itemdetails?itemName=cospaia.clojure4vscode) or [cider-mode](https://cider.readthedocs.io/en/latest/)*.
    1. Assuming Calva, you can use the command "Calva: Connect", either in the debugging instance (for that emacs feeling), or in the vscode instance that started debugging.
    2. It's important that you fill in the port you got from running `shadow-cljs clj-repl` before.
 5. When you have successfully connected with a cljs-repl client, you should be able to evaluate: `(js/console.log "I'm the queen!")` - the result is shown in the `Debug Console` of the vscode instance where you started debugging!
