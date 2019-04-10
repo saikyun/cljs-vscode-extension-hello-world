@@ -133,6 +133,7 @@ To go to CLJS-land, I found it easiest to:
 1. Connect using your favourite repl client, e.g. [Calva](https://marketplace.visualstudio.com/itemdetails?itemName=cospaia.clojure4vscode) or [cider-mode](https://cider.readthedocs.io/en/latest/)*.
    1. Assuming Calva, you can use the command "Calva: Connect", either in the debugging instance (for that emacs feeling), or in the vscode instance that started debugging.
    2. It's important that you fill in the port you got from running `shadow-cljs clj-repl` before.
+   3. Choose `:dev` when asked about build
 2. When you have successfully connected with a cljs-repl client, you should be able to evaluate: `(js/console.log "I'm the queen!")` - the result is shown in the `Debug Console` of the vscode instance where you started debugging!
 3. To really verify that it works, you could run the following in the repl:
    ```clojure
