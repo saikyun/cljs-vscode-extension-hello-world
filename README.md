@@ -84,7 +84,7 @@ Enjoy!
 
 ## But what about the REPL?
 
-Since we're acting like spoilt kids, we're lucky to have [thheller](https://github.com/thheller) to provide for us. When you run `shadow-cljs watch dev`, you might in the terminal notice a line akin to: `shadow-cljs - nREPL server started on port 61155`. Great news!
+We're lucky to have [thheller](https://github.com/thheller) provide for us. When you run `shadow-cljs watch dev`, you might notice the following in the terminal: `shadow-cljs - nREPL server started on port 61155`. Great news!
 
 1. Connect to the nREPL server using your favourite client. Since you're using vscode, maybe [Calva](https://marketplace.visualstudio.com/itemdetails?itemName=cospaia.clojure4vscode)? I've also tried [cider-mode](https://cider.readthedocs.io/en/latest/). Calva was the most simple though, so I recommend that.
 2. Now, you might think that you can just fire away stuff like `(js/console.log "I'm the queen!")`, but sadly, your client will most likely just get mad at you. This is what I got:
