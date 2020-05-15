@@ -40,11 +40,9 @@ In the `extension.core` namespace we have a function called `activate`. In it we
 2. Make a change in the call to `showInformationMessage`, e.g. `(showInformationMessage "Hella World!")`
 3. Run the command "Hello World" from the command palette again.
 
-You should see the same message as earlier.
+You should see the same "Hello World" message as earlier. This is not right! As clojurians, we love dynamic development environments. The step to fix this is simple.
 
-As we are clojurians, we love us some dynamic development environments. The step to fix this is simple!
-
-When you register the command, instead of registering a lambda, register a var instead!
+When you register the command, instead of registering a lambda, register a var instead.
 
 In `core.cljs`:
 
