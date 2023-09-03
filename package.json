@@ -1,21 +1,18 @@
 {
-	"name": "helloworld-minimal-sample",
-	"description": "Minimal HelloWorld example for VS Code",
+	"name": "shards-lsp",
+	"description": "Shards LSP",
 	"version": "0.0.1",
 	"publisher": "vscode-samples",
 	"repository": "https://github.com/Microsoft/vscode-extension-samples/helloworld-minimal-sample",
 	"engines": {
-		"vscode": "^1.25.0"
+		"vscode": "^1.41.0"
 	},
-	"activationEvents": [
-		"onCommand:extension.helloWorld"
-	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.helloWorld",
-				"title": "Hello World"
+				"command": "extension.shards-lsp",
+				"title": "Shards LSP"
 			}
 		]
 	},
@@ -23,7 +20,7 @@
 		"postinstall": "node ./node_modules/vscode/bin/install"
 	},
 	"devDependencies": {
-		"shadow-cljs": "^2.8.29",
-		"vscode": "^1.1.22"
+		"shadow-cljs": "^2.25.3",
+		"vscode": "^1.1.37"
 	}
 }
