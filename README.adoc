@@ -1,4 +1,4 @@
-= vscode-shards
+= vscode-shards image:https://img.shields.io/badge/license-BSD%203--Clause-blue.svg[License: BSD 3-Clause, link=LICENSE]
 
 Shards Language Support in VSCode
 
