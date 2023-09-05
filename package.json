@@ -1,26 +1,18 @@
 {
-	"name": "shards-lsp",
-	"description": "Shards LSP",
+	"name": "shards",
+	"description": "Shards language support",
 	"version": "0.0.1",
-	"publisher": "vscode-samples",
-	"repository": "https://github.com/Microsoft/vscode-extension-samples/helloworld-minimal-sample",
+	"publisher": "fragcolor.com",
+	"repository": "https://github.com/fragcolor-xyz/vscode-shards",
 	"engines": {
 		"vscode": "^1.41.0"
 	},
+	"activationEvents": [
+		"onLanguage:shards"
+	],
 	"main": "./out/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "extension.shards-lsp",
-				"title": "Shards LSP"
-			}
-		]
-	},
-	"scripts": {
-		"postinstall": "node ./node_modules/vscode/bin/install"
-	},
 	"devDependencies": {
-		"shadow-cljs": "^2.25.3",
-		"vscode": "^1.1.37"
+		"@types/code": "^4.0.6",
+		"shadow-cljs": "^2.25.3"
 	}
 }
