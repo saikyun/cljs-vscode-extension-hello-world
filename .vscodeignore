@@ -1,0 +1,9 @@
+.calva/**
+.clj-kondo/**
+.gitignore
+.lsp/**
+.shadow-cljs/**
+.vscode/**
+samples/**
+shadow-cljs.edn
+src

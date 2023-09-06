@@ -1,0 +1,12 @@
+
+@wire(foo {
+  1 | Log
+})
+
+@wire(bar {
+  Do(foo)
+})
+
+@mesh(main)
+@schedule(main bar)
+@run(main)

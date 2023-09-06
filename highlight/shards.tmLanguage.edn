@@ -1,0 +1,42 @@
+{:$schema "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json"
+ :name "shards"
+ :patterns [{:include "#comments"}
+            {:include "#commas"}
+            {:include "#assignments"}
+            {:include "#enums"} ; must come before :shards
+            {:include "#parameters"} ; must come before :shards
+            {:include "#shards"}
+            {:include "#literals"}
+            {:include "#variables"}
+            {:include "#strings"}]
+ :repository {:comments {:name "comment.line.semicolon.shards"
+                         :match ";.*"}
+              :commas {:name "punctuation.separator.comma.shards"
+                       :match ","}
+              :assignments {:name "keyword.operator.assignment.shards"
+                            :match "=|>|>=|>>|>>=|>>!"}
+              :enums {:name "support.function.shards"
+                      :match "\\b([A-Z][a-zA-Z0-9_]*::[A-Z][a-zA-Z0-9_]*)\\b"}
+              :parameters {:name "keyword.control.shards"
+                           :match "\\b[A-Z][A-Za-z0-9-._]*:"}
+              :shards {:name "entity.name.type.class.shards"
+                       :match "(@[a-z]|_?[A-Z])[a-zA-Z0-9_./-]*"}
+              :literals {:patterns [{:name "constant.language.boolean.shards"
+                                     :match "\\b(true|false)\\b"}
+                                    {:name "constant.numeric.shards"
+                                     :match "\\b(0x[a-fA-F0-9]+|\\d+)\\b"}
+                                    {:name "constant.language.null.shards"
+                                     :match "\\b(none|null)\\b"}]}
+              :variables {:name "variable.other.readwrite.shards"
+                          :match "[a-z_][a-zA-Z0-9_.-]*"}
+              :strings {:patterns [{:name "string.quoted.double.shards"
+                                    :begin "\""
+                                    :end "\""
+                                    :patterns [{:name "constant.character.escape.shards"
+                                                :match "\\\\."}]}
+                                   {:name "string.quoted.triple.shards"
+                                    :begin "\"\"\""
+                                    :end "\"\"\""
+                                    :patterns [{:name "constant.character.escape.shards"
+                                                :match "\\\\."}]}]}}
+ :scopeName "source.shards"}

@@ -1,29 +1,54 @@
 {
-	"name": "helloworld-minimal-sample",
-	"description": "Minimal HelloWorld example for VS Code",
-	"version": "0.0.1",
-	"publisher": "vscode-samples",
-	"repository": "https://github.com/Microsoft/vscode-extension-samples/helloworld-minimal-sample",
-	"engines": {
-		"vscode": "^1.25.0"
+	"name": "shards",
+	"displayName": "Shards language support",
+	"description": "Language support for the Shards programming language.",
+	"version": "0.0.5",
+	"publisher": "fragcolor",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/fragcolor-xyz/vscode-shards.git"
 	},
-	"activationEvents": [
-		"onCommand:extension.helloWorld"
+	"url": "https://github.com/fragcolor-xyz/vscode-shards",
+	"author": "Fragcolor and contributors",
+	"license": "BSD-3-Clause",
+	"icon": "logo.png",
+	"categories": [
+		"Programming Languages"
 	],
-	"main": "./out/extension.js",
+	"engines": {
+		"vscode": "^1.74.0"
+	},
+	"activationEvents": [],
 	"contributes": {
-		"commands": [
-			{
-				"command": "extension.helloWorld",
-				"title": "Hello World"
+		"configuration": {
+			"title": "Shards",
+			"properties": {
+				"shards.path": {
+					"type": "string",
+					"default": "/usr/local/bin/shards",
+					"description": "Full path to the 'shards' executable"
+				}
 			}
-		]
+		},
+		"configurationDefaults": {
+			"[shards]": {
+				"editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",<>/?"
+			}
+		},
+		"languages": [{
+			"id": "shards",
+			"aliases": ["Shards", "shards"],
+			"extensions": [".shs"],
+			"configuration": "./highlight/language-configuration.json"
+		}],
+		"grammars": [{
+			"language": "shards",
+			"scopeName": "source.shards",
+			"path": "./highlight/shards.tmLanguage.json"
+		}]
 	},
-	"scripts": {
-		"postinstall": "node ./node_modules/vscode/bin/install"
-	},
+	"main": "./out/extension.js",
 	"devDependencies": {
-		"shadow-cljs": "^2.8.29",
-		"vscode": "^1.1.22"
+		"shadow-cljs": "^2.25.4"
 	}
 }

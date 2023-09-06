@@ -1,0 +1,23 @@
+
+@wire(herbs {
+  3 | Log
+})
+
+@wire(eggs {
+  2 | Log
+})
+
+
+
+@wire(foo {
+  1 | Log
+})
+
+@wire(bar {
+  Do(foo)
+  Do(herbs)
+})
+
+@mesh(main)
+@schedule(main bar)
+@run(main)
