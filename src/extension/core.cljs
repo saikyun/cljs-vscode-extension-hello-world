@@ -18,25 +18,33 @@
 (defn slurp [path]
   (fs/readFileSync (path/resolve js/__dirname path) "utf8"))
 
-(defn gen-rand-ast-filename []
-  (str/join "-" [(rand-int 100000) "ast.json"]))
+(defn gen-rand-ast-filename [kind]
+  (let [extension (if (= "code" kind) "shs" "json")]
+    (str/join "-" [(rand-int 100000) kind extension])))
 
 (def json->clj (comp #(js->clj % :keywordize-keys true) js/JSON.parse))
 
-(defn ->ast [_]
-  (when-let [editor vscode/window.activeTextEditor]
-    (when (= "shards" (some-> editor  .-document .-languageId))
+(defn ->ast []
+  (let [editor vscode/window.activeTextEditor
+        doc (some-> editor .-document)
+        text (some-> doc .getText)]
+    (when (and editor
+               (= "shards" (.-languageId doc))
+               (not= (hash text) (get-in @ast [doc.fileName :code-hash])))
       (let [shards-filename-path (.-path (vscode/workspace.getConfiguration "shards"))
             tmpdir (os/tmpdir)
-            rand-shs-path (str/join "/" [tmpdir (gen-rand-ast-filename)])
-            rand-ast-path (str/join "/" [tmpdir (gen-rand-ast-filename)])
+            rand-shs-path (str/join "/" [tmpdir (gen-rand-ast-filename "code")])
+            rand-ast-path (str/join "/" [tmpdir (gen-rand-ast-filename "ast")])
             cmd (str/join " " [shards-filename-path "ast" rand-shs-path "-o" rand-ast-path])]
-        (spit rand-shs-path (vscode/window.activeTextEditor.document.getText))
+        (spit rand-shs-path text)
         (.exec cp cmd #js {:cwd tmpdir}
-               (fn [a b c]
-                 (println a b c)
-                 (->> rand-ast-path slurp json->clj (swap! ast assoc vscode/window.activeTextEditor.document.fileName))
-                 (fs/unlink rand-ast-path (fn [err] (println err)))))))))
+               (fn [error b c]
+                 (println error b c)
+                 (swap! ast assoc-in [doc.fileName :code-hash] (hash text))
+                 (when (fs/existsSync rand-ast-path)
+                   (->> rand-ast-path slurp json->clj (swap! ast assoc-in [doc.fileName :ast]))
+                   (fs/unlink rand-ast-path (fn [err] (println err))))
+                 (fs/unlink rand-shs-path (fn [err] (println err)))))))))
 
 (defn ->location
   [doc a-range]
@@ -63,13 +71,14 @@
 
 (defn handle-goto-def [ast]
   (fn [^js doc ^js pos _]
-    (let [word-range (.getWordRangeAtPosition doc pos #"[a-z_][a-zA-Z0-9_.-]*")
-          word (.getText doc word-range)
-          {:keys [line column]} (->wire-pos (get @ast vscode/window.activeTextEditor.document.fileName) word)]
-      (->location doc
-                  (->range
-                    {:start-pos {:line (dec line) :column (+ column 5)}
-                     :end-pos {:line (dec line) :column (+ column 5 (count word))}})))))
+    (when doc
+      (let [word-range (.getWordRangeAtPosition doc pos #"[a-z_][a-zA-Z0-9_.-]*")
+            word (.getText doc word-range)
+            {:keys [line column]} (->wire-pos (get-in @ast [doc.fileName :ast]) word)]
+        (->location doc
+                    (->range
+                     {:start-pos {:line (dec line) :column (+ column 5)}
+                      :end-pos {:line (dec line) :column (+ column 5 (count word))}}))))))
 
 (defn reload []
   (.log js/console "Reloading...")
@@ -77,10 +86,10 @@
 
 (defn activate [context]
   (doto ^js (.-subscriptions context)
-    (.push (vscode/window.onDidChangeVisibleTextEditors (fn [e] (println "onDidChangeVisibleTextEditors") (->ast e))))
-    (.push (vscode/window.onDidChangeActiveTextEditor (fn [e] (println "onDidChangeActiveTextEditor") (->ast e))))
-    (.push (vscode/window.onDidChangeWindowState (fn [e] (println "onDidChangeWindowState") (->ast e))))
-    (.push (vscode/workspace.onDidSaveTextDocument (fn [e] (println "onDidSaveTextDocument") (->ast e))))
+    (.push (vscode/window.onDidChangeVisibleTextEditors (fn [_] (println "onDidChangeVisibleTextEditors") (->ast))))
+    (.push (vscode/window.onDidChangeActiveTextEditor (fn [_] (println "onDidChangeActiveTextEditor" (->ast)))))
+    (.push (vscode/window.onDidChangeWindowState (fn [_] (println "onDidChangeWindowState" (->ast)))))
+    (.push (vscode/workspace.onDidSaveTextDocument (fn [_] (println "onDidSaveTextDocument" (->ast)))))
     (.push (vscode/languages.registerDefinitionProvider "shards" #js {:provideDefinition (handle-goto-def ast)}))))
 
 (defn deactivate [])
