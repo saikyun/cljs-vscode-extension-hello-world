@@ -9,6 +9,8 @@
 
 (def ast (atom nil))
 
+(def debounce-timeout (atom nil))
+
 (defn spit [file-path content]
   (.writeFileSync fs file-path content))
 
@@ -21,6 +23,11 @@
 (defn gen-rand-ast-filename [kind]
   (let [extension (if (= "code" kind) "shs" "json")]
     (str/join "-" [(rand-int 100000) kind extension])))
+
+(defn debounce [debounce-store f delay]
+  (js/clearTimeout @debounce-store)
+  (reset! debounce-store
+          (js/setTimeout f delay)))
 
 (def json->clj (comp #(js->clj % :keywordize-keys true) js/JSON.parse))
 
@@ -87,6 +94,9 @@
             wire-locations (get-in @ast [doc.fileName :wire-locations])]
         (:location (ffilter #(= word (:wire %)) wire-locations))))))
 
+(defn ->debounced-ast [ast]
+  (debounce debounce-timeout #(->ast ast) 300))
+
 (defn reload []
   (.log js/console "Reloading...")
   (js-delete js/require.cache (js/require.resolve "./extension")))
@@ -96,6 +106,7 @@
     (.push (vscode/window.onDidChangeVisibleTextEditors (fn [_] (println "onDidChangeVisibleTextEditors") (->ast ast))))
     (.push (vscode/window.onDidChangeActiveTextEditor (fn [_] (println "onDidChangeActiveTextEditor" (->ast ast)))))
     (.push (vscode/window.onDidChangeWindowState (fn [_] (println "onDidChangeWindowState" (->ast ast)))))
+    (.push (vscode/workspace.onDidChangeTextDocument (fn [_] (println "onDidChangeTextDocument") (->debounced-ast ast))))
     (.push (vscode/workspace.onDidSaveTextDocument (fn [_] (println "onDidSaveTextDocument" (->ast ast)))))
     (.push (vscode/languages.registerDefinitionProvider "shards" #js {:provideDefinition (handle-goto-def ast)}))))
 
