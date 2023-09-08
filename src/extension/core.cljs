@@ -21,16 +21,17 @@
 (def json->clj (comp #(js->clj % :keywordize-keys true) js/JSON.parse))
 
 (defn ->ast [_]
-  (when (= "shards" vscode/window.activeTextEditor.document.languageId)
-    (let [shards-filename-path (.-path (vscode/workspace.getConfiguration "shards"))
-          tmpdir (os/tmpdir)
-          rand-ast-path (str/join "/" [tmpdir (gen-rand-ast-filename)])
-          cmd (str/join " " [shards-filename-path "ast" vscode/window.activeTextEditor.document.fileName "-o" rand-ast-path])]
-      (.exec cp cmd #js {:cwd tmpdir}
-             (fn [a b c]
-               (println a b c)
-               (->> rand-ast-path slurp json->clj (swap! ast assoc vscode/window.activeTextEditor.document.fileName))
-               (fs/unlink rand-ast-path (fn [err] (println err))))))))
+  (when-let [editor vscode/window.activeTextEditor]
+    (when (= "shards" (some-> editor  .-document .-languageId))
+      (let [shards-filename-path (.-path (vscode/workspace.getConfiguration "shards"))
+            tmpdir (os/tmpdir)
+            rand-ast-path (str/join "/" [tmpdir (gen-rand-ast-filename)])
+            cmd (str/join " " [shards-filename-path "ast" vscode/window.activeTextEditor.document.fileName "-o" rand-ast-path])]
+        (.exec cp cmd #js {:cwd tmpdir}
+               (fn [a b c]
+                 (println a b c)
+                 (->> rand-ast-path slurp json->clj (swap! ast assoc vscode/window.activeTextEditor.document.fileName))
+                 (fs/unlink rand-ast-path (fn [err] (println err)))))))))
 
 (defn ->location
   [doc a-range]

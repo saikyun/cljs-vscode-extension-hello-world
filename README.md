@@ -51,6 +51,8 @@ Start debugging this extension:
 
 **Go to definition**: Try with `test*.shs` files.
 
+**Shards path**: Go to settings, look for shards, setup a non-default path for shards and test with a **go to definition**.
+
 #### Making changes
 
 When making changes to `shards.tmLanguage.edn`, generate `shards.tmLanguage.json` using a tool like [jet](https://github.com/borkdude/jet), here as:
@@ -120,8 +122,6 @@ In the `extension.core` namespace we have a function called `activate`. In it we
 To re-run `activate`, click the green `Restart`-symbol in the debugging interface (the one with the pause-button etc).
 
 Make sure that your project compiles properly, you see this by looking in the terminal, where `shadow-cljs` is nice enough to tell you when something goes wrong.
-
-This code and parts from this readme were taken from: [cljs-vscode-extension-hello-world](https://github.com/saikyun/cljs-vscode-extension-hello-world).
 
 #### But what about the REPL?
 
@@ -196,6 +196,10 @@ Contributions are welcome! Feel free to open an issue or submit a pull request.
 
 To share this extension with the world, read on about [publishing an extension](https://code.visualstudio.com/api/working-with-extensions/publishing-extension).
 
-## [LICENSE](License)
+## Acknowledgements
 
-_vscode-shards-syntax_ source code is licensed under the link:[BSD 3-Clause license](LICENSE).
+This repo was originally forked from: [cljs-vscode-extension-hello-world](https://github.com/saikyun/cljs-vscode-extension-hello-world).
+
+## [LICENSE](LICENSE)
+
+_vscode-shards-syntax_ source code is licensed under the [BSD 3-Clause license](LICENSE).
