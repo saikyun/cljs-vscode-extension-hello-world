@@ -9,6 +9,9 @@
 
 (def ast (atom nil))
 
+(defn spit [file-path content]
+  (.writeFileSync fs file-path content))
+
 (defn ffilter [pred coll]
   (first (filter pred coll)))
 
@@ -25,8 +28,10 @@
     (when (= "shards" (some-> editor  .-document .-languageId))
       (let [shards-filename-path (.-path (vscode/workspace.getConfiguration "shards"))
             tmpdir (os/tmpdir)
+            rand-shs-path (str/join "/" [tmpdir (gen-rand-ast-filename)])
             rand-ast-path (str/join "/" [tmpdir (gen-rand-ast-filename)])
-            cmd (str/join " " [shards-filename-path "ast" vscode/window.activeTextEditor.document.fileName "-o" rand-ast-path])]
+            cmd (str/join " " [shards-filename-path "ast" rand-shs-path "-o" rand-ast-path])]
+        (spit rand-shs-path (vscode/window.activeTextEditor.document.getText))
         (.exec cp cmd #js {:cwd tmpdir}
                (fn [a b c]
                  (println a b c)
