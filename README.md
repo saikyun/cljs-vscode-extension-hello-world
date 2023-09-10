@@ -62,9 +62,9 @@ cat shards.tmLanguage.edn |jet --to=json > shards.tmLanguage.json
 
 Test code prior to release:
 ```bash
-shadow-cljs release dev --debug
+shadow-cljs release dev
 ```
-Useful to test if if you've got _uncaught_ errors from using advanced optimizations, which btw, is not an opt-in feature to get a standalone `out/extension.js` file.
+Useful to uncover issues that could arise from using `:simple` optimizations.
 
 #### Reload extension
 
@@ -89,7 +89,6 @@ highlight/shards.tmLanguage.json
 LICENSE
 logo.png
 out/extension.js
-out/extension.js.map
 package.json
 README.md
 ```

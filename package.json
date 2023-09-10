@@ -2,7 +2,7 @@
 	"name": "shards",
 	"displayName": "Shards language support",
 	"description": "Language support for the Shards programming language.",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"publisher": "fragcolor",
 	"repository": {
 		"type": "git",
@@ -16,7 +16,7 @@
 		"Programming Languages"
 	],
 	"engines": {
-		"vscode": "^1.74.0"
+		"vscode": "^1.75.0"
 	},
 	"activationEvents": [],
 	"contributes": {
@@ -45,7 +45,13 @@
 			"language": "shards",
 			"scopeName": "source.shards",
 			"path": "./highlight/shards.tmLanguage.json"
-		}]
+		}],
+		"views": {
+			"explorer": [{
+				"id": "shards-outline",
+				"name": "Outline for Shards script"
+			}]
+		}
 	},
 	"main": "./out/extension.js",
 	"devDependencies": {
