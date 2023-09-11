@@ -45,6 +45,7 @@
 
 (defn ->wires-ast-info [ast]
   (some->> ast
+           :sequence
            :statements
            (keep (comp :blocks :Pipeline))
            (mapcat identity)
