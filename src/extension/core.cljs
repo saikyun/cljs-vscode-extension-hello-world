@@ -10,32 +10,10 @@
 
 (def ast (atom nil))
 
-(def debounce-timeout (atom nil))
-
 (def unlink (util/promisify fs/unlink))
-
-(defn ->filename [path]
-  (last (str/split path #"/")))
-
-(defn mv-filename [path dir]
-  (str/join "/" [dir (->filename path)]))
 
 (defn slurp [path]
   (fs/readFileSync (path/resolve js/__dirname path) "utf8"))
-
-(defn spit [path text]
-  (js/Promise.
-   (fn [resolve _]
-     (.writeFileSync fs path text)
-     (resolve))))
-
-(def slurp-vsdoc
-  (util/promisify
-    (fn [path callback]
-      (-> (vscode/Uri.file path)
-          (vscode/workspace.openTextDocument)
-          (.then (fn [doc] (callback nil (doc.getText)))
-                 (fn [err] (callback err nil)))))))
 
 (defn ffilter [pred coll]
   (first (filter pred coll)))
@@ -43,11 +21,6 @@
 (defn gen-rand-ast-filename [kind]
   (let [extension (if (= "code" kind) "shs" "json")]
     (str/join "-" [(rand-int 100000) kind extension])))
-
-(defn debounce [debounce-store f delay]
-  (js/clearTimeout @debounce-store)
-  (reset! debounce-store
-          (js/setTimeout f delay)))
 
 (def json->clj (comp #(js->clj % :keywordize-keys true) js/JSON.parse))
 
@@ -122,8 +95,8 @@
                             pos (.-start range)
                             new-sel (new vscode/Selection pos pos)]
                         (aset editor "selections" #js [new-sel])
-                        (.revealRange editor range)
-                        (.showTextDocument vscode/window doc))))))))
+                        (editor.revealRange range)
+                        (vscode/window.showTextDocument doc))))))))
 
 (def outline-provider
   #js {:getTreeItem identity
@@ -155,30 +128,22 @@
       (when (not= (hash text) (get-in @ast [doc.fileName :code-hash]))
         (let [shards-filename-path (.-path (vscode/workspace.getConfiguration "shards"))
               tmpdir (os/tmpdir)
-              [rand-shs-path rand-ast-path] (map #(str/join "/" [tmpdir (gen-rand-ast-filename %)]) ["code" "ast"])
-              [cmd-origin cmd] (map #(str/join " " [shards-filename-path "ast" % "-o" rand-ast-path]) [doc.fileName rand-shs-path])]
-          (spit rand-shs-path text)
-          (-> (->cmd cmd-origin #js {:cwd tmpdir})
-              (.then (fn [error b c]
-                       (println error b c)
-                       (when (fs/existsSync rand-ast-path)
-                         (let [ast-edn (-> rand-ast-path slurp json->clj)]
-                           (js/Promise.all
-                             (map (fn [path]
-                                    (-> (slurp-vsdoc path)
-                                        (.then (fn [text] (spit (mv-filename path tmpdir) text)))))
-                                  (->included-files ast-edn)))))))
-              (.then (fn [_] (unlink rand-ast-path)))
-              (.then (fn [_] (->cmd cmd #js {:cwd tmpdir})))
-              (.then (fn [error b c]
-                       (println error b c)
-                       (when (fs/existsSync rand-ast-path)
-                         (swap! ast assoc-in [doc.fileName :code-hash] (hash text))
-                         (let [ast-edn (-> rand-ast-path slurp json->clj)]
-                           (->> ast-edn (->wire-locations doc) (swap! ast assoc-in [doc.fileName :wire-locations])))
-                         (->outline)
-                         (unlink rand-ast-path))))
-              (.then (fn [_] (unlink rand-shs-path))))))
+              rand-ast-path (str/join "/" [tmpdir (gen-rand-ast-filename "ast")])
+              cmd (str/join " " [shards-filename-path "ast" doc.fileName "-o" rand-ast-path])]
+              (-> (->cmd cmd #js {:cwd tmpdir})
+                  (.then (fn [error b c]
+                           (println error b c)
+                           (println "executed command")
+                           (when (fs/existsSync rand-ast-path)
+                             (println "rand-ast-path" rand-ast-path)
+                             (swap! ast assoc-in [doc.fileName :code-hash] (hash text))
+                             (let [ast-edn (-> rand-ast-path slurp json->clj)]
+                               (println ast-edn "ast-edn")
+                               (->> ast-edn (->wire-locations doc) (swap! ast assoc-in [doc.fileName :wire-locations]))
+                               (println "(->wire-locations doc)" (->wire-locations doc ast-edn)))
+                             (->outline)
+                             (unlink rand-ast-path))))
+                  (.then (fn [err] (some-> err println))))))
       (->outline))))
 
 (defn handle-goto-def [ast]
@@ -189,9 +154,6 @@
             wire-locations (get-in @ast [doc.fileName :wire-locations])]
         (:location (ffilter #(= word (:wire %)) wire-locations))))))
 
-(defn ->debounced-ast [ast]
-  (debounce debounce-timeout #(->ast! ast) 300))
-
 (defn reload []
   (.log js/console "Reloading...")
   (js-delete js/require.cache (js/require.resolve "./extension")))
@@ -201,7 +163,6 @@
     (.push (vscode/window.onDidChangeVisibleTextEditors (fn [_] (println "onDidChangeVisibleTextEditors") (->ast! ast))))
     (.push (vscode/window.onDidChangeActiveTextEditor (fn [_] (println "onDidChangeActiveTextEditor" (->ast! ast)))))
     (.push (vscode/window.onDidChangeWindowState (fn [_] (println "onDidChangeWindowState" (->ast! ast)))))
-    (.push (vscode/workspace.onDidChangeTextDocument (fn [_] (println "onDidChangeTextDocument") (->debounced-ast ast))))
     (.push (vscode/workspace.onDidSaveTextDocument (fn [_] (println "onDidSaveTextDocument" (->ast! ast)))))
     (.push (vscode/languages.registerDefinitionProvider "shards" #js {:provideDefinition (handle-goto-def ast)}))))
 
