@@ -5,10 +5,24 @@
 This extension will provide comprehensive support for the Shards programming language in Visual Studio Code. Developed in `ClojureScript` and `tmLanguage`, the extension will offer:
 
 - [x] Syntax highlighting
+- [x] Custom shards path
 - [x] Go to definitions
-  - [ ] Cross-file
+  - [x] Wires
+    - [ ] Cross-file
+  - [ ] Variables
+  - [ ] @define
 - [ ] Go to references
-- [ ] Outline
+- [x] Outline
+  - [ ] Meshes with go to definitions
+  - [x] Wire definitions with go to definitions
+    - [ ] Variable definitions with go definitions
+    - [ ] Wire references (activator type too?) with go to definitions
+- [ ] Red file on:
+  - [ ] no ast
+  - [ ] duplicate wire definitions
+- [ ] Red squiggle under duplicate wire definitions
+- [ ] Warnings:
+  - [ ] Shards executable wasn't found. Try to show only once, in case user only wants syntax highlighting.
 
 ## Install extension
 
@@ -20,7 +34,8 @@ You could also copy this repo or just copy the relevant files to `<user home>/.v
 
 ## Usage
 
-After installing the extension, open any `.shs` file to activate the extension.
+1. Setup full path to shards executable in the settings: search for "shards"
+1. Open any `.shs` file to activate the extension.
 
 ##  Development
 

@@ -5,17 +5,37 @@
    ["child_process" :as cp]
    ["os" :as os]
    ["fs" :as fs]
-   ["path" :as path]))
+   ["path" :as path]
+   ["util" :as util]))
 
 (def ast (atom nil))
 
 (def debounce-timeout (atom nil))
 
-(defn spit [file-path content]
-  (.writeFileSync fs file-path content))
+(def unlink (util/promisify fs/unlink))
+
+(defn ->filename [path]
+  (last (str/split path #"/")))
+
+(defn mv-filename [path dir]
+  (str/join "/" [dir (->filename path)]))
 
 (defn slurp [path]
   (fs/readFileSync (path/resolve js/__dirname path) "utf8"))
+
+(defn spit [path text]
+  (js/Promise.
+   (fn [resolve _]
+     (.writeFileSync fs path text)
+     (resolve))))
+
+(def slurp-vsdoc
+  (util/promisify
+    (fn [path callback]
+      (-> (vscode/Uri.file path)
+          (vscode/workspace.openTextDocument)
+          (.then (fn [doc] (callback nil (doc.getText)))
+                 (fn [err] (callback err nil)))))))
 
 (defn ffilter [pred coll]
   (first (filter pred coll)))
@@ -31,6 +51,15 @@
 
 (def json->clj (comp #(js->clj % :keywordize-keys true) js/JSON.parse))
 
+(defn ->cmd [cmd options]
+  (js/Promise.
+    (fn [resolve reject]
+      (cp/exec cmd options
+               (fn [error b c]
+                 (if error
+                   (reject error)
+                   (resolve {:stdout b :stderr c})))))))
+
 (defn ->location
   [doc a-range]
   #js {"range" a-range
@@ -43,17 +72,29 @@
        (:line end-pos)
        (:column end-pos)))
 
+(defn ->ast-blocks [ast]
+  (some->> ast :sequence :statements (mapcat (comp :blocks :Pipeline))))
+
+(defn ->ast-programs-blocks [ast]
+  (->> ast
+       (->ast-blocks)
+       (mapcat #(if-let [program (some-> % :content :Program)]
+                  (->ast-blocks program)
+                  [%]))))
+
 (defn ->wires-ast-info [ast]
   (some->> ast
-           :sequence
-           :statements
-           (keep (comp :blocks :Pipeline))
-           (mapcat identity)
+           (->ast-programs-blocks)
            (filter #(= "wire" (some-> % :content :Func :name :name)))
-           (map #(hash-map :wire (some->> % :content :Func :params (keep (comp :name :Identifier :value)) (first))
+           (map #(hash-map :wire (->> % :content :Func :params (keep (comp :name :Identifier :value)) (first))
                            :line-info (:line_info %)))))
 
-(defn ->wire-location [doc {:keys [wire line-info]}] 
+(defn ->included-files [ast]
+  (->> ast
+       (->ast-blocks)
+       (keep (comp :name :metadata :Program :content))))
+
+(defn ->wire-location [doc {:keys [wire line-info]}]
   (let [{:keys [line column]} line-info]
     {:wire wire
      :location (->location doc
@@ -106,7 +147,7 @@
                                      location (.-location item)]
                                  (reveal-location location))))))
 
-(defn ->ast [ast]
+(defn ->ast! [ast]
   (let [editor vscode/window.activeTextEditor
         doc (some-> editor .-document)
         text (some-> doc .getText)]
@@ -114,19 +155,30 @@
       (when (not= (hash text) (get-in @ast [doc.fileName :code-hash]))
         (let [shards-filename-path (.-path (vscode/workspace.getConfiguration "shards"))
               tmpdir (os/tmpdir)
-              rand-shs-path (str/join "/" [tmpdir (gen-rand-ast-filename "code")])
-              rand-ast-path (str/join "/" [tmpdir (gen-rand-ast-filename "ast")])
-              cmd (str/join " " [shards-filename-path "ast" rand-shs-path "-o" rand-ast-path])]
+              [rand-shs-path rand-ast-path] (map #(str/join "/" [tmpdir (gen-rand-ast-filename %)]) ["code" "ast"])
+              [cmd-origin cmd] (map #(str/join " " [shards-filename-path "ast" % "-o" rand-ast-path]) [doc.fileName rand-shs-path])]
           (spit rand-shs-path text)
-          (.exec cp cmd #js {:cwd tmpdir}
-                 (fn [error b c]
-                   (println error b c)
-                   (when (fs/existsSync rand-ast-path)
-                     (swap! ast assoc-in [doc.fileName :code-hash] (hash text))
-                     (->> rand-ast-path slurp json->clj (->wire-locations doc) (swap! ast assoc-in [doc.fileName :wire-locations]))
-                     (fs/unlink rand-ast-path (fn [err] (println err)))
-                     (->outline))
-                   (fs/unlink rand-shs-path (fn [err] (println err)))))))
+          (-> (->cmd cmd-origin #js {:cwd tmpdir})
+              (.then (fn [error b c]
+                       (println error b c)
+                       (when (fs/existsSync rand-ast-path)
+                         (let [ast-edn (-> rand-ast-path slurp json->clj)]
+                           (js/Promise.all
+                             (map (fn [path]
+                                    (-> (slurp-vsdoc path)
+                                        (.then (fn [text] (spit (mv-filename path tmpdir) text)))))
+                                  (->included-files ast-edn)))))))
+              (.then (fn [_] (unlink rand-ast-path)))
+              (.then (fn [_] (->cmd cmd #js {:cwd tmpdir})))
+              (.then (fn [error b c]
+                       (println error b c)
+                       (when (fs/existsSync rand-ast-path)
+                         (swap! ast assoc-in [doc.fileName :code-hash] (hash text))
+                         (let [ast-edn (-> rand-ast-path slurp json->clj)]
+                           (->> ast-edn (->wire-locations doc) (swap! ast assoc-in [doc.fileName :wire-locations])))
+                         (->outline)
+                         (unlink rand-ast-path))))
+              (.then (fn [_] (unlink rand-shs-path))))))
       (->outline))))
 
 (defn handle-goto-def [ast]
@@ -138,7 +190,7 @@
         (:location (ffilter #(= word (:wire %)) wire-locations))))))
 
 (defn ->debounced-ast [ast]
-  (debounce debounce-timeout #(->ast ast) 300))
+  (debounce debounce-timeout #(->ast! ast) 300))
 
 (defn reload []
   (.log js/console "Reloading...")
@@ -146,11 +198,11 @@
 
 (defn activate [context]
   (doto ^js (.-subscriptions context)
-    (.push (vscode/window.onDidChangeVisibleTextEditors (fn [_] (println "onDidChangeVisibleTextEditors") (->ast ast))))
-    (.push (vscode/window.onDidChangeActiveTextEditor (fn [_] (println "onDidChangeActiveTextEditor" (->ast ast)))))
-    (.push (vscode/window.onDidChangeWindowState (fn [_] (println "onDidChangeWindowState" (->ast ast)))))
+    (.push (vscode/window.onDidChangeVisibleTextEditors (fn [_] (println "onDidChangeVisibleTextEditors") (->ast! ast))))
+    (.push (vscode/window.onDidChangeActiveTextEditor (fn [_] (println "onDidChangeActiveTextEditor" (->ast! ast)))))
+    (.push (vscode/window.onDidChangeWindowState (fn [_] (println "onDidChangeWindowState" (->ast! ast)))))
     (.push (vscode/workspace.onDidChangeTextDocument (fn [_] (println "onDidChangeTextDocument") (->debounced-ast ast))))
-    (.push (vscode/workspace.onDidSaveTextDocument (fn [_] (println "onDidSaveTextDocument" (->ast ast)))))
+    (.push (vscode/workspace.onDidSaveTextDocument (fn [_] (println "onDidSaveTextDocument" (->ast! ast)))))
     (.push (vscode/languages.registerDefinitionProvider "shards" #js {:provideDefinition (handle-goto-def ast)}))))
 
 (defn deactivate [])

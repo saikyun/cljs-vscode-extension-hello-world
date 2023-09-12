@@ -27,17 +27,6 @@
   2 | Log
 })
 
-@wire(foo {
-  1 | Log
-})
-
-
-
-@wire(bar {
-  Do(foo)
-  Do(daam)
-})
-
 @mesh(main)
 @schedule(main bar)
 @run(main)
