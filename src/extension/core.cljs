@@ -10,6 +10,8 @@
 
 (def ast (atom nil))
 
+(def treeDataEventEmitter (new vscode/EventEmitter))
+
 (def unlink (util/promisify fs/unlink))
 
 (defn slurp [path]
@@ -103,6 +105,7 @@
 (def outline-provider
   #js {:getTreeItem identity
        :getParent (fn [_] nil)
+       :onDidChangeTreeData treeDataEventEmitter.event
        :getChildren (fn []
                       (when-let [doc (some-> vscode/window.activeTextEditor .-document)]
                         (let [wires (get-in @ast [doc.fileName :wire-locations])]
@@ -110,16 +113,6 @@
 
 (def view-options
   #js {:treeDataProvider outline-provider})
-
-; OPTIMIZE to generate outline only when wire locations change.
-(defn ->outline []
-  (-> (vscode/window.createTreeView "shards-outline" view-options)
-      (.onDidChangeSelection (fn [selection]
-                               (println "onDidChangeSelection" selection)
-                               (let [items (.-selection selection)
-                                     item (aget items "0")
-                                     location (.-location item)]
-                                 (reveal-location location))))))
 
 (defn ->ast! [ast]
   (let [editor vscode/window.activeTextEditor
@@ -138,10 +131,10 @@
                              (swap! ast assoc-in [doc.fileName :code-hash] (hash text))
                              (let [ast-edn (-> rand-ast-path slurp json->clj)]
                                (->> ast-edn (->wire-locations) (swap! ast assoc-in [doc.fileName :wire-locations])))
-                             (->outline)
+                             (.fire ^js treeDataEventEmitter)
                              (unlink rand-ast-path))))
                   (.then (fn [err] (some-> err println))))))
-      (->outline))))
+      (.fire ^js treeDataEventEmitter))))
 
 (defn handle-goto-def [ast]
   (fn [^js doc ^js pos _]
@@ -164,7 +157,14 @@
     (.push (vscode/window.onDidChangeActiveTextEditor (fn [_] (println "onDidChangeActiveTextEditor" (->ast! ast)))))
     (.push (vscode/window.onDidChangeWindowState (fn [_] (println "onDidChangeWindowState" (->ast! ast)))))
     (.push (vscode/workspace.onDidSaveTextDocument (fn [_] (println "onDidSaveTextDocument" (->ast! ast)))))
-    (.push (vscode/languages.registerDefinitionProvider "shards" #js {:provideDefinition (handle-goto-def ast)}))))
+    (.push (vscode/languages.registerDefinitionProvider "shards" #js {:provideDefinition (handle-goto-def ast)}))
+    (.push (-> (vscode/window.createTreeView "shards-outline" view-options)
+               (.onDidChangeSelection (fn [selection]
+                                        (println "onDidChangeSelection" selection)
+                                        (let [items (.-selection selection)
+                                              item (aget items "0")
+                                              location (.-location item)]
+                                          (reveal-location location))))))))
 
 (defn deactivate [])
 

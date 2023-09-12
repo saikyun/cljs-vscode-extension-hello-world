@@ -11,6 +11,7 @@ This extension will provide comprehensive support for the Shards programming lan
     - [x] Cross-file
   - [ ] Variables
   - [ ] @define
+  - [ ] @template
 - [ ] Go to references
 - [x] Outline
   - [ ] Meshes with go to definitions
