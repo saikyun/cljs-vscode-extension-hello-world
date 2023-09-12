@@ -8,7 +8,7 @@ This extension will provide comprehensive support for the Shards programming lan
 - [x] Custom shards path
 - [x] Go to definitions
   - [x] Wires
-    - [ ] Cross-file
+    - [x] Cross-file
   - [ ] Variables
   - [ ] @define
 - [ ] Go to references

@@ -34,9 +34,9 @@
                    (resolve {:stdout b :stderr c})))))))
 
 (defn ->location
-  [doc a-range]
+  [uri a-range]
   #js {"range" a-range
-       "uri" (.-uri doc)})
+       "uri" uri})
 
 (defn ->range [{:keys [start-pos end-pos]}]
   (new vscode/Range
@@ -48,35 +48,30 @@
 (defn ->ast-blocks [ast]
   (some->> ast :sequence :statements (mapcat (comp :blocks :Pipeline))))
 
-(defn ->ast-programs-blocks [ast]
-  (->> ast
-       (->ast-blocks)
-       (mapcat #(if-let [program (some-> % :content :Program)]
-                  (->ast-blocks program)
-                  [%]))))
-
 (defn ->wires-ast-info [ast]
-  (some->> ast
-           (->ast-programs-blocks)
-           (filter #(= "wire" (some-> % :content :Func :name :name)))
-           (map #(hash-map :wire (->> % :content :Func :params (keep (comp :name :Identifier :value)) (first))
-                           :line-info (:line_info %)))))
+  (let [init-blocks (->ast-blocks ast)
+        activeDoc (some-> vscode/window.activeTextEditor .-document)]
+    (mapcat
+      (fn [init-block]
+        (let [path (or (some-> init-block :content :Program :metadata :name) (some-> activeDoc .-fileName))]
+          (some->> (if-let [program (some-> init-block :content :Program)]
+                     (->ast-blocks program)
+                     [init-block])
+                   (filter #(= "wire" (some-> % :content :Func :name :name)))
+                   (map #(hash-map :wire (->> % :content :Func :params (keep (comp :name :Identifier :value)) (first))
+                                   :line-info (:line_info %)
+                                   :path path)))))
+      init-blocks)))
 
-(defn ->included-files [ast]
-  (->> ast
-       (->ast-blocks)
-       (keep (comp :name :metadata :Program :content))))
-
-(defn ->wire-location [doc {:keys [wire line-info]}]
+(defn ->wire-location [{:keys [path wire line-info]}]
   (let [{:keys [line column]} line-info]
     {:wire wire
-     :location (->location doc
-                           (->range
-                             {:start-pos {:line (dec line) :column (+ column 5)}
-                              :end-pos {:line (dec line) :column (+ column 5 (count wire))}}))}))
+     :location {:range {:start-pos {:line (dec line) :column (+ column 5)}
+                        :end-pos {:line (dec line) :column (+ column 5 (count wire))}}
+                :path path}}))
 
-(defn ->wire-locations [doc ast]
-  (map (partial ->wire-location doc) (->wires-ast-info ast)))
+(defn ->wire-locations [ast]
+  (map ->wire-location (->wires-ast-info ast)))
 
 (defn ->wire-item [{:keys [wire location]}]
   {:label wire
@@ -85,18 +80,25 @@
 (defn ->outline-items [wires]
   (map ->wire-item wires))
 
+(defn ->vscode-location [{:keys [path range]}]
+  (let [uri (vscode/Uri.file path)
+        {:keys [start-pos end-pos]} range]
+    (->location uri
+                (->range {:start-pos start-pos
+                          :end-pos end-pos}))))
+
 (defn reveal-location [^js location]
-  (let [uri (.-uri location)]
-    (.then (vscode/workspace.openTextDocument uri)
-           (fn [doc]
-             (.then (vscode/window.showTextDocument doc)
-                    (fn [^js editor]
-                      (let [range (.-range location)
-                            pos (.-start range)
-                            new-sel (new vscode/Selection pos pos)]
-                        (aset editor "selections" #js [new-sel])
-                        (editor.revealRange range)
-                        (vscode/window.showTextDocument doc))))))))
+  (let [vscode-location (-> location (js->clj :keywordize-keys true) (->vscode-location))
+        uri vscode-location.uri]
+    (-> uri
+        vscode/workspace.openTextDocument
+        (.then (fn [doc] (vscode/window.showTextDocument doc)))
+        (.then (fn [^js editor]
+                 (let [range vscode-location.range
+                       pos range.start
+                       new-sel (new vscode/Selection pos pos)]
+                   (aset editor "selections" #js [new-sel])
+                   (editor.revealRange range)))))))
 
 (def outline-provider
   #js {:getTreeItem identity
@@ -110,7 +112,6 @@
   #js {:treeDataProvider outline-provider})
 
 ; OPTIMIZE to generate outline only when wire locations change.
-; For now it's hard to do because locations are js objects (mutable), so not simple to compare.
 (defn ->outline []
   (-> (vscode/window.createTreeView "shards-outline" view-options)
       (.onDidChangeSelection (fn [selection]
@@ -133,14 +134,10 @@
               (-> (->cmd cmd #js {:cwd tmpdir})
                   (.then (fn [error b c]
                            (println error b c)
-                           (println "executed command")
                            (when (fs/existsSync rand-ast-path)
-                             (println "rand-ast-path" rand-ast-path)
                              (swap! ast assoc-in [doc.fileName :code-hash] (hash text))
                              (let [ast-edn (-> rand-ast-path slurp json->clj)]
-                               (println ast-edn "ast-edn")
-                               (->> ast-edn (->wire-locations doc) (swap! ast assoc-in [doc.fileName :wire-locations]))
-                               (println "(->wire-locations doc)" (->wire-locations doc ast-edn)))
+                               (->> ast-edn (->wire-locations) (swap! ast assoc-in [doc.fileName :wire-locations])))
                              (->outline)
                              (unlink rand-ast-path))))
                   (.then (fn [err] (some-> err println))))))
@@ -152,7 +149,10 @@
       (let [word-range (.getWordRangeAtPosition doc pos #"[a-z_][a-zA-Z0-9_.-]*")
             word (.getText doc word-range)
             wire-locations (get-in @ast [doc.fileName :wire-locations])]
-        (:location (ffilter #(= word (:wire %)) wire-locations))))))
+        (->> wire-locations
+             (ffilter #(= word (:wire %)))
+             :location
+             (->vscode-location))))))
 
 (defn reload []
   (.log js/console "Reloading...")
